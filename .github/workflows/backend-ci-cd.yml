@@ -3,12 +3,15 @@ name: Backend CI/CD
 on:
   push:
     branches:
-      - master
-      - tkaz/**
+      - main
+      - dev
     paths:
       - "backend/**"
       - ".github/workflows/backend-ci-cd.yml"
   pull_request:
+    branches:
+      - main
+      - dev
     paths:
       - "backend/**"
       - ".github/workflows/backend-ci-cd.yml"
