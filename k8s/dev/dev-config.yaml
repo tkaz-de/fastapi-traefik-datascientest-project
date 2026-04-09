@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/environment: dev
     app.kubernetes.io/managed-by: github-actions
 data:
-  ENVIRONMENT: "development"
+  ENVIRONMENT: "local"
   DOMAIN: "dev.fastapi.local"
   PROJECT_NAME: "FastAPI Project Dev"
   FIRST_SUPERUSER: "admin@example.com"

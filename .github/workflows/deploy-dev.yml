@@ -14,7 +14,6 @@ env:
   IMAGE_NAMESPACE: fastapi-liora
   BACKEND_IMAGE: ghcr.io/fastapi-liora/fastapi-traefik-datascientest-project-backend
   FRONTEND_IMAGE: ghcr.io/fastapi-liora/fastapi-traefik-datascientest-project-frontend
-  K8S_ENV: dev
 
 jobs:
   test:
@@ -141,16 +140,20 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build backend image
-        run: docker build -t $BACKEND_IMAGE:${{ steps.meta.outputs.image_tag }} ./backend
+        run: |
+          docker build -t $BACKEND_IMAGE:${{ steps.meta.outputs.image_tag }} ./backend
 
       - name: Build frontend image
-        run: docker build -t $FRONTEND_IMAGE:${{ steps.meta.outputs.image_tag }} ./frontend
+        run: |
+          docker build -t $FRONTEND_IMAGE:${{ steps.meta.outputs.image_tag }} ./frontend
 
       - name: Push backend image
-        run: docker push $BACKEND_IMAGE:${{ steps.meta.outputs.image_tag }}
+        run: |
+          docker push $BACKEND_IMAGE:${{ steps.meta.outputs.image_tag }}
 
       - name: Push frontend image
-        run: docker push $FRONTEND_IMAGE:${{ steps.meta.outputs.image_tag }}
+        run: |
+          docker push $FRONTEND_IMAGE:${{ steps.meta.outputs.image_tag }}
 
   deploy-dev:
     runs-on: self-hosted
@@ -172,67 +175,105 @@ jobs:
           chmod 600 $HOME/.kube/config-ci
           echo "KUBECONFIG=$HOME/.kube/config-ci" >> $GITHUB_ENV
 
+      - name: Verify kubectl and cluster access
+        run: |
+          echo "User: $(whoami)"
+          echo "Home: $HOME"
+          which kubectl
+          kubectl version --client
+          kubectl config current-context
+          kubectl get ns
+
       - name: Apply dev manifests
-        run: kubectl apply -f k8s/${K8S_ENV}
+        run: |
+          kubectl apply -f k8s/dev
+
+      - name: Check resources after apply
+        run: |
+          echo "=== Namespaces ==="
+          kubectl get ns
+          echo "=== Deployments in dev ==="
+          kubectl get deployments -n dev -o wide
+          echo "=== ReplicaSets in dev ==="
+          kubectl get rs -n dev
+          echo "=== Pods in dev ==="
+          kubectl get pods -n dev -o wide
+          echo "=== Services in dev ==="
+          kubectl get svc -n dev
 
       - name: Update backend image in deployment
         run: |
           kubectl set image deployment/backend \
             backend=$BACKEND_IMAGE:${{ needs.build-and-push.outputs.image_tag }} \
-            -n ${K8S_ENV}
+            -n dev
 
       - name: Update frontend image in deployment
         run: |
           kubectl set image deployment/frontend \
             frontend=$FRONTEND_IMAGE:${{ needs.build-and-push.outputs.image_tag }} \
-            -n ${K8S_ENV}
+            -n dev
+
+      - name: Check deployment state before rollout wait
+        run: |
+          echo "=== Backend deployment ==="
+          kubectl get deployment backend -n dev -o wide
+          kubectl describe deployment backend -n dev
+          echo "=== Frontend deployment ==="
+          kubectl get deployment frontend -n dev -o wide
+          kubectl describe deployment frontend -n dev
+          echo "=== ReplicaSets ==="
+          kubectl get rs -n dev
+          echo "=== Pods ==="
+          kubectl get pods -n dev -o wide
 
       - name: Wait for backend rollout
-        run: kubectl rollout status deployment/backend -n ${K8S_ENV} --timeout=180s
+        run: |
+          kubectl rollout status deployment/backend -n dev --timeout=300s
 
       - name: Wait for frontend rollout
-        run: kubectl rollout status deployment/frontend -n ${K8S_ENV} --timeout=180s
+        run: |
+          kubectl rollout status deployment/frontend -n dev --timeout=300s
 
       - name: Final resource check
         if: always()
         run: |
           echo "=== Final pods ==="
-          kubectl get pods -n ${K8S_ENV} -o wide
+          kubectl get pods -n dev -o wide
           echo "=== Final services ==="
-          kubectl get svc -n ${K8S_ENV}
+          kubectl get svc -n dev
           echo "=== Final deployments ==="
-          kubectl get deployments -n ${K8S_ENV} -o wide
+          kubectl get deployments -n dev -o wide
           echo "=== Final ReplicaSets ==="
-          kubectl get rs -n ${K8S_ENV}
+          kubectl get rs -n dev
 
       - name: Debug events and pod descriptions
         if: always()
         run: |
           echo "=== Events ==="
-          kubectl get events -n ${K8S_ENV} --sort-by=.metadata.creationTimestamp || true
+          kubectl get events -n dev --sort-by=.metadata.creationTimestamp || true
 
           echo "=== Describe backend deployment ==="
-          kubectl describe deployment backend -n ${K8S_ENV} || true
+          kubectl describe deployment backend -n dev || true
 
           echo "=== Describe frontend deployment ==="
-          kubectl describe deployment frontend -n ${K8S_ENV} || true
+          kubectl describe deployment frontend -n dev || true
 
-          echo "=== Describe all pods in namespace ==="
-          for pod in $(kubectl get pods -n ${K8S_ENV} -o jsonpath='{.items[*].metadata.name}'); do
+          echo "=== Describe all pods in dev ==="
+          for pod in $(kubectl get pods -n dev -o jsonpath='{.items[*].metadata.name}'); do
             echo "----- DESCRIBE POD: $pod -----"
-            kubectl describe pod "$pod" -n ${K8S_ENV} || true
+            kubectl describe pod "$pod" -n dev || true
           done
 
       - name: Backend logs
         if: always()
         run: |
           echo "=== Backend pod logs ==="
-          for pod in $(kubectl get pods -n ${K8S_ENV} -o jsonpath='{.items[*].metadata.name}'); do
+          for pod in $(kubectl get pods -n dev -o jsonpath='{.items[*].metadata.name}'); do
             if [[ "$pod" == backend* ]]; then
               echo "----- LOGS FOR $pod -----"
-              kubectl logs "$pod" -n ${K8S_ENV} --all-containers=true --tail=200 || true
+              kubectl logs "$pod" -n dev --all-containers=true --tail=200 || true
               echo "----- PREVIOUS LOGS FOR $pod -----"
-              kubectl logs "$pod" -n ${K8S_ENV} --all-containers=true --tail=200 --previous || true
+              kubectl logs "$pod" -n dev --all-containers=true --tail=200 --previous || true
             fi
           done
 
@@ -240,11 +281,11 @@ jobs:
         if: always()
         run: |
           echo "=== Frontend pod logs ==="
-          for pod in $(kubectl get pods -n ${K8S_ENV} -o jsonpath='{.items[*].metadata.name}'); do
+          for pod in $(kubectl get pods -n dev -o jsonpath='{.items[*].metadata.name}'); do
             if [[ "$pod" == frontend* ]]; then
               echo "----- LOGS FOR $pod -----"
-              kubectl logs "$pod" -n ${K8S_ENV} --all-containers=true --tail=200 || true
+              kubectl logs "$pod" -n dev --all-containers=true --tail=200 || true
               echo "----- PREVIOUS LOGS FOR $pod -----"
-              kubectl logs "$pod" -n ${K8S_ENV} --all-containers=true --tail=200 --previous || true
+              kubectl logs "$pod" -n dev --all-containers=true --tail=200 --previous || true
             fi
           done
