@@ -192,6 +192,18 @@ jobs:
           kubectl config current-context
           kubectl get ns
 
+      - name: Configure GHCR pull secret
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          kubectl apply -f k8s/dev/dev-namespace.yaml
+          kubectl create secret docker-registry ghcr-secret \
+            --docker-server=ghcr.io \
+            --docker-username="${{ github.actor }}" \
+            --docker-password="$GHCR_TOKEN" \
+            -n dev \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Apply dev manifests
         run: |
           kubectl apply -f k8s/dev
@@ -209,17 +221,31 @@ jobs:
           echo "=== Services in dev ==="
           kubectl get svc -n dev
 
+      - name: Load images into local Minikube
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          if command -v minikube >/dev/null 2>&1; then
+            minikube image load "$BACKEND_IMAGE:${{ needs.build-and-push.outputs.image_tag }}"
+            minikube image load "$FRONTEND_IMAGE:${{ needs.build-and-push.outputs.image_tag }}"
+          else
+            echo "Minikube not present on runner; relying on GHCR image pull secret."
+          fi
+
       - name: Update backend image in deployment
         run: |
           kubectl set image deployment/backend \
             backend=$BACKEND_IMAGE:${{ needs.build-and-push.outputs.image_tag }} \
             -n dev
+          kubectl patch deployment backend -n dev \
+            -p '{"spec":{"template":{"spec":{"containers":[{"name":"backend","imagePullPolicy":"IfNotPresent"}]}}}}'
 
       - name: Update frontend image in deployment
         run: |
           kubectl set image deployment/frontend \
             frontend=$FRONTEND_IMAGE:${{ needs.build-and-push.outputs.image_tag }} \
             -n dev
+          kubectl patch deployment frontend -n dev \
+            -p '{"spec":{"template":{"spec":{"containers":[{"name":"frontend","imagePullPolicy":"IfNotPresent"}]}}}}'
 
       - name: Check deployment state before rollout wait
         run: |
