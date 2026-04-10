@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - dev
+      - "devops-*"
 
 permissions:
   contents: read
