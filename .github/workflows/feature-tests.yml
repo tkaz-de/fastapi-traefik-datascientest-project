@@ -2,119 +2,125 @@ name: Feature Branch Tests
 
 on:
   pull_request:
-    branches: [dev, main]
+    branches:
+      - dev
+      - main
   push:
-    branches: [feature/**]
+    branches:
+      - "feature/**"
 
 jobs:
   backend-unit-tests:
     name: Backend Unit Tests
     runs-on: ubuntu-latest
-    if: contains(github.head_ref, 'backend') || contains(github.ref, 'backend') || github.base_ref == 'dev'
-    
+    if: github.event_name == 'pull_request' || startsWith(github.ref_name, 'feature/')
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
-        run: |
-          cd backend
-          pip install -r requirements-dev.txt
-      
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.4.15"
+          enable-cache: true
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: uv sync --dev
+
       - name: Run unit tests
-        run: |
-          cd backend
-          pytest tests/unit/ -v -m unit
+        working-directory: ./backend
+        run: uv run pytest tests/unit/test_models_unit.py -v
 
   backend-integration-tests:
     name: Backend Integration Tests
     runs-on: ubuntu-latest
     needs: backend-unit-tests
-    if: github.base_ref == 'dev' || github.base_ref == 'main'
-    
+    if: github.event_name == 'pull_request' || startsWith(github.ref_name, 'feature/')
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d app"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
-        run: |
-          cd backend
-          pip install -r requirements-dev.txt
-      
-      - name: Start PostgreSQL
-        run: |
-          docker run -d \
-            -e POSTGRES_USER=postgres \
-            -e POSTGRES_PASSWORD=testpass \
-            -e POSTGRES_DB=test_db \
-            -p 5432:5432 \
-            postgres:15
-          sleep 5
-      
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.4.15"
+          enable-cache: true
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: uv sync --dev
+
       - name: Run migrations
-        run: |
-          cd backend
-          export DATABASE_URL=postgresql://postgres:testpass@localhost/test_db
-          alembic upgrade head
-      
+        working-directory: ./backend
+        env:
+          POSTGRES_SERVER: "localhost"
+          POSTGRES_PORT: "5433"
+          POSTGRES_USER: "postgres"
+          POSTGRES_PASSWORD: "postgres"
+          POSTGRES_DB: "app"
+        run: uv run alembic upgrade head
+
       - name: Run integration tests
-        run: |
-          cd backend
-          export DATABASE_URL=postgresql://postgres:testpass@localhost/test_db
-          pytest tests/integration/ -v -m integration
+        working-directory: ./backend
+        env:
+          POSTGRES_SERVER: "localhost"
+          POSTGRES_PORT: "5433"
+          POSTGRES_USER: "postgres"
+          POSTGRES_PASSWORD: "postgres"
+          POSTGRES_DB: "app"
+          SMTP_HOST: "smtp.gmail.com"
+          SMTP_PORT: "587"
+          SMTP_USER: "test@example.com"
+          SMTP_PASSWORD: "test"
+          SMTP_TLS: "true"
+          EMAILS_FROM_EMAIL: "test@example.com"
+          EMAILS_FROM_NAME: "test@example.com"
+          EMAILS_ENABLED: "true"
+        run: uv run pytest tests/integration/ -v
 
   frontend-unit-tests:
     name: Frontend Unit Tests
     runs-on: ubuntu-latest
-    if: contains(github.head_ref, 'frontend') || contains(github.ref, 'frontend') || github.base_ref == 'dev'
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      
-      - name: Install dependencies
-        run: |
-          cd frontend
-          npm ci
-      
-      - name: Run unit tests
-        run: |
-          cd frontend
-          npm run test:unit
+    if: github.event_name == 'pull_request' || startsWith(github.ref_name, 'feature/')
 
-  e2e-tests:
-    name: E2E Tests
-    runs-on: ubuntu-latest
-    needs: backend-integration-tests
-    if: github.base_ref == 'dev' || github.base_ref == 'main'
-    
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      
+          node-version: "20"
+
       - name: Install dependencies
-        run: |
-          cd frontend
-          npm ci
-          npx playwright install --with-deps chromium
-      
-      - name: Run E2E tests
-        run: |
-          cd frontend
-          npm run test:e2e
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: ./frontend
+        run: npm run test:unit

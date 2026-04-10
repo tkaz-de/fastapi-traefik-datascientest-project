@@ -1,5 +1,51 @@
 # FastAPI Project - Deployment
 
+## Maintained Path
+
+The maintained delivery path for this repository is:
+
+- one VM
+- Minikube on that VM
+- Kubernetes namespaces `dev` and `prod`
+- GHCR for registry
+- GitHub Actions for CI/CD
+
+The older Docker Compose and Traefik instructions below remain useful as legacy or fallback material, but they are not the primary path used to satisfy the current project requirements.
+
+## Single-VM Minikube Deployment
+
+For the implemented requirement path on one VM:
+
+1. Install or place `minikube` on the VM.
+2. Start Minikube with Docker driver:
+
+```bash
+minikube start --driver=docker --cpus=2 --memory=3072 --addons=ingress
+```
+
+3. Apply namespaces and manifests:
+
+```bash
+kubectl apply -f k8s/dev
+kubectl apply -f k8s/prod
+```
+
+4. For local Minikube verification, the ingress resources must target the local NGINX ingress controller.
+5. For single-node local verification, `prod` may run with one application replica to fit VM capacity.
+
+## Implemented DR Components
+
+The current Kubernetes manifests now include:
+
+- persistent database storage in `dev` and `prod`
+- dedicated backup PVCs in `dev` and `prod`
+- daily PostgreSQL backup CronJobs in `dev` and `prod`
+
+Relevant manifests:
+
+- `k8s/dev/postgres-dev.yaml`
+- `k8s/prod/postgres-prod.yaml`
+
 You can deploy the project using Docker Compose to a remote server.
 
 This project expects you to have a Traefik proxy handling communication to the outside world and HTTPS certificates.

@@ -13,16 +13,14 @@ permissions:
 env:
   DEPLOY_TARGET: kubernetes
   REGISTRY: ghcr.io
-  IMAGE_NAMESPACE: fastapi-liora
-  BACKEND_IMAGE: ghcr.io/fastapi-liora/fastapi-traefik-datascientest-project-backend
-  FRONTEND_IMAGE: ghcr.io/fastapi-liora/fastapi-traefik-datascientest-project-frontend
+  IMAGE_NAMESPACE: ${{ github.repository_owner }}
+  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/fastapi-traefik-datascientest-project-backend
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/fastapi-traefik-datascientest-project-frontend
   K8S_ENV: prod
 
 jobs:
   build-and-push:
-    runs-on:
-      - self-hosted
-      - production
+    runs-on: self-hosted
     outputs:
       image_tag: ${{ steps.meta.outputs.image_tag }}
     steps:
@@ -65,9 +63,7 @@ jobs:
         run: echo "Deployment to production approved via GitHub Environment reviewers."
 
   deploy-prod:
-    runs-on:
-      - self-hosted
-      - production
+    runs-on: self-hosted
     needs:
       - build-and-push
       - approval-gate
@@ -82,12 +78,18 @@ jobs:
         with:
           version: latest
 
-      - name: Write kubeconfig
+      - name: Configure kubeconfig
+        env:
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG_PROD }}
         run: |
-          mkdir -p $HOME/.kube
-          printf '%s' "${{ secrets.KUBECONFIG_PROD }}" > $HOME/.kube/config-ci
-          chmod 600 $HOME/.kube/config-ci
-          echo "KUBECONFIG=$HOME/.kube/config-ci" >> $GITHUB_ENV
+          if [ -n "$KUBECONFIG_CONTENT" ]; then
+            mkdir -p $HOME/.kube
+            printf '%s' "$KUBECONFIG_CONTENT" > $HOME/.kube/config-ci
+            chmod 600 $HOME/.kube/config-ci
+            echo "KUBECONFIG=$HOME/.kube/config-ci" >> $GITHUB_ENV
+          else
+            echo "Using the self-hosted runner default kubeconfig."
+          fi
 
       - name: Apply prod manifests
         run: kubectl apply -f k8s/${K8S_ENV}

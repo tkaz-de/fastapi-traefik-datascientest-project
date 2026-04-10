@@ -9,21 +9,27 @@ updates:
       prefix: ⬆
   # Python
   - package-ecosystem: pip
-    directory: /
+    directory: /backend
     schedule:
       interval: daily
     commit-message:
       prefix: ⬆
   # npm
   - package-ecosystem: npm
-    directory: /
+    directory: /frontend
     schedule:
       interval: daily
     commit-message:
       prefix: ⬆
   # Docker
   - package-ecosystem: docker
-    directory: /
+    directory: /backend
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ⬆
+  - package-ecosystem: docker
+    directory: /frontend
     schedule:
       interval: weekly
     commit-message:

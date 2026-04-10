@@ -7,6 +7,8 @@ Dieses Repository unterstützt Monitoring in zwei verbindlichen Betriebsmodellen
 
 ## 1) K8s-Betriebsmodell (verbindlich für Cluster-Betrieb)
 
+Im aktuell umgesetzten Ein-VM-Nachweis läuft dieses K8s-Betriebsmodell auf Minikube. `dev` und `prod` sind dabei per Namespace getrennt.
+
 Die folgenden Manifeste stellen den Monitoring-Stack bereit:
 
 - `k8s/monitoring/monitoring-namespace.yaml`
@@ -15,6 +17,7 @@ Die folgenden Manifeste stellen den Monitoring-Stack bereit:
 - `k8s/monitoring/blackbox-exporter.yaml`
 - `k8s/monitoring/alertmanager.yaml`
 - `k8s/monitoring/grafana.yaml`
+- `k8s/monitoring/grafana-dashboards.yaml`
 
 ### Deployment
 
@@ -24,6 +27,7 @@ kubectl apply -f k8s/monitoring/blackbox-exporter.yaml
 kubectl apply -f k8s/monitoring/alertmanager.yaml
 kubectl apply -f k8s/monitoring/prometheus-config.yaml
 kubectl apply -f k8s/monitoring/prometheus-deployment.yaml
+kubectl apply -f k8s/monitoring/grafana-dashboards.yaml
 kubectl apply -f k8s/monitoring/grafana.yaml
 ```
 
@@ -67,7 +71,7 @@ Die Alert-Regeln liegen in `k8s/monitoring/prometheus-config.yaml` und decken mi
   - `monitoring/grafana/provisioning/datasources/datasource.yml`
   - `monitoring/grafana/provisioning/dashboards/dashboards.yml`
 
-> Hinweis: Im Kubernetes-Setup wird Grafana mit Provisioning für die Prometheus-Datasource ausgeliefert. Das Dashboard kann über den UI-Import aus `monitoring/grafana/dashboards/backend-overview.json` oder via erweitertes ConfigMap-Provisioning hinterlegt werden.
+Im Kubernetes-Setup wird Grafana mit Prometheus-Datasource und `Backend Overview` Dashboard provisioniert. Das Dashboard wird aus `k8s/monitoring/grafana-dashboards.yaml` nach `/var/lib/grafana/dashboards/backend-overview.json` gemountet.
 
 ## 5) Alarmwege
 

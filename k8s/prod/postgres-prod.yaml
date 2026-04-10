@@ -1,17 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: db-dev
-  namespace: dev
+  name: db-prod
+  namespace: prod
+  labels:
+    app.kubernetes.io/name: fastapi-traefik-datascientest-project
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: platform
+    app.kubernetes.io/environment: prod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: db-dev
+      app.kubernetes.io/name: fastapi-traefik-datascientest-project
+      app.kubernetes.io/component: database
+      app.kubernetes.io/environment: prod
   template:
     metadata:
       labels:
-        app: db-dev
+        app.kubernetes.io/name: fastapi-traefik-datascientest-project
+        app.kubernetes.io/component: database
+        app.kubernetes.io/environment: prod
     spec:
       containers:
         - name: postgres
@@ -36,48 +45,55 @@ spec:
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
-            claimName: db-dev-data
+            claimName: db-prod-data
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: db-dev
-  namespace: dev
+  name: db-prod
+  namespace: prod
+  labels:
+    app.kubernetes.io/name: fastapi-traefik-datascientest-project
+    app.kubernetes.io/component: database
+    app.kubernetes.io/environment: prod
 spec:
   ports:
     - port: 5432
+      targetPort: 5432
   selector:
-    app: db-dev
+    app.kubernetes.io/name: fastapi-traefik-datascientest-project
+    app.kubernetes.io/component: database
+    app.kubernetes.io/environment: prod
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: db-dev-data
-  namespace: dev
+  name: db-prod-data
+  namespace: prod
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
+      storage: 10Gi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: db-dev-backups
-  namespace: dev
+  name: db-prod-backups
+  namespace: prod
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
+      storage: 10Gi
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: db-dev-backup
-  namespace: dev
+  name: db-prod-backup
+  namespace: prod
 spec:
   schedule: "0 2 * * *"
   successfulJobsHistoryLimit: 3
@@ -103,7 +119,7 @@ spec:
                   set -eu
                   mkdir -p /backup
                   pg_dump --format=custom --no-owner --no-privileges \
-                    --host=db-dev --username=postgres --dbname=app \
+                    --host=db-prod --username=postgres --dbname=app \
                     | gzip > "/backup/app_$(date +%F_%H%M).dump.gz"
                   find /backup -type f -name '*.dump.gz' -mtime +14 -delete
               volumeMounts:
@@ -112,4 +128,4 @@ spec:
           volumes:
             - name: backup-volume
               persistentVolumeClaim:
-                claimName: db-dev-backups
+                claimName: db-prod-backups

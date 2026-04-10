@@ -11,8 +11,8 @@ from app.core.config import settings
 from app.core.security import verify_password
 from app.crud import create_user
 from app.models import UserCreate
-from tests.utils.user import user_authentication_headers
-from tests.utils.utils import random_email, random_lower_string
+from app.tests.utils.user import user_authentication_headers
+from app.tests.utils.utils import random_email, random_lower_string
 from app.utils import generate_password_reset_token
 
 

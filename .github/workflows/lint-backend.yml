@@ -3,11 +3,15 @@ name: Lint Backend
 on:
   push:
     branches:
-      - master
+      - main
+      - dev
   pull_request:
     types:
       - opened
       - synchronize
+    paths:
+      - "backend/**"
+      - ".github/workflows/lint-backend.yml"
 
 jobs:
   lint-backend:
@@ -24,5 +28,8 @@ jobs:
         with:
           version: "0.4.15"
           enable-cache: true
+      - name: Install backend dependencies
+        working-directory: backend
+        run: uv sync --dev
       - run: uv run bash scripts/lint.sh
         working-directory: backend

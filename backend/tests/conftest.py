@@ -11,9 +11,8 @@ from typing import Generator
 from app.main import app
 from app.core.config import settings
 from app.core.db import engine
-from app.models import SQLModel
+from app.models import SQLModel, UserCreate
 from app.crud import create_user
-from app.schemas import UserCreate
 
 
 # ============================================================================
@@ -143,5 +142,5 @@ def create_test_user(db_session):
             password=password,
             full_name=full_name
         )
-        return create_user(db_session, user_data)
+        return create_user(session=db_session, user_create=user_data)
     return _create_user

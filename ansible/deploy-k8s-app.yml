@@ -1,0 +1,152 @@
+# Usage:
+# ansible-playbook -i inventory.ini deploy-k8s-app.yml \
+#   -e ghcr_username=<github-user> \
+#   -e ghcr_token=<ghcr-token> \
+#   -e dev_postgres_password=<password> \
+#   -e dev_secret_key=<secret> \
+#   -e dev_first_superuser_password=<password> \
+#   -e prod_postgres_password=<password> \
+#   -e prod_secret_key=<secret> \
+#   -e prod_first_superuser_password=<password>
+
+- name: Deploy dev and prod namespaces to the Kubernetes VM
+  hosts: fastapivm_test
+  become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    k8s_vm_user: ipatsaf
+    repo_root: "{{ playbook_dir | dirname }}"
+    remote_repo_root: /home/ipatsaf/fastapi-traefik-datascientest-project
+
+  pre_tasks:
+    - name: Assert required GHCR credentials are provided
+      assert:
+        that:
+          - ghcr_username is defined
+          - ghcr_token is defined
+        fail_msg: "ghcr_username and ghcr_token are required"
+
+    - name: Assert required dev secrets are provided
+      assert:
+        that:
+          - dev_postgres_password is defined
+          - dev_secret_key is defined
+          - dev_first_superuser_password is defined
+        fail_msg: "dev secrets are required"
+
+    - name: Assert required prod secrets are provided
+      assert:
+        that:
+          - prod_postgres_password is defined
+          - prod_secret_key is defined
+          - prod_first_superuser_password is defined
+        fail_msg: "prod secrets are required"
+
+  tasks:
+    - name: Ensure project directory exists on target VM
+      file:
+        path: "{{ remote_repo_root }}"
+        state: directory
+        owner: "{{ k8s_vm_user }}"
+        group: "{{ k8s_vm_user }}"
+        mode: "0755"
+
+    - name: Sync repository to target VM
+      synchronize:
+        src: "{{ repo_root }}/"
+        dest: "{{ remote_repo_root }}/"
+        delete: false
+        recursive: true
+
+    - name: Render backend secret manifest for dev
+      template:
+        src: templates/backend-secret.yaml.j2
+        dest: "{{ remote_repo_root }}/k8s/dev/backend-secret.rendered.yaml"
+        owner: "{{ k8s_vm_user }}"
+        group: "{{ k8s_vm_user }}"
+        mode: "0600"
+      vars:
+        namespace: dev
+        postgres_password: "{{ dev_postgres_password }}"
+        secret_key: "{{ dev_secret_key }}"
+        first_superuser_password: "{{ dev_first_superuser_password }}"
+        app_env: development
+
+    - name: Render backend secret manifest for prod
+      template:
+        src: templates/backend-secret.yaml.j2
+        dest: "{{ remote_repo_root }}/k8s/prod/backend-secret.rendered.yaml"
+        owner: "{{ k8s_vm_user }}"
+        group: "{{ k8s_vm_user }}"
+        mode: "0600"
+      vars:
+        namespace: prod
+        postgres_password: "{{ prod_postgres_password }}"
+        secret_key: "{{ prod_secret_key }}"
+        first_superuser_password: "{{ prod_first_superuser_password }}"
+        app_env: production
+
+    - name: Ensure namespaces exist
+      become_user: "{{ k8s_vm_user }}"
+      shell: |
+        kubectl apply -f "{{ remote_repo_root }}/k8s/dev/dev-namespace.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/prod/prod-namespace.yaml"
+      args:
+        executable: /bin/bash
+
+    - name: Create or refresh GHCR image pull secret in dev
+      become_user: "{{ k8s_vm_user }}"
+      shell: |
+        kubectl -n dev delete secret ghcr-secret --ignore-not-found
+        kubectl -n dev create secret docker-registry ghcr-secret \
+          --docker-server=ghcr.io \
+          --docker-username="{{ ghcr_username }}" \
+          --docker-password="{{ ghcr_token }}"
+      args:
+        executable: /bin/bash
+
+    - name: Create or refresh GHCR image pull secret in prod
+      become_user: "{{ k8s_vm_user }}"
+      shell: |
+        kubectl -n prod delete secret ghcr-secret --ignore-not-found
+        kubectl -n prod create secret docker-registry ghcr-secret \
+          --docker-server=ghcr.io \
+          --docker-username="{{ ghcr_username }}" \
+          --docker-password="{{ ghcr_token }}"
+      args:
+        executable: /bin/bash
+
+    - name: Apply dev manifests
+      become_user: "{{ k8s_vm_user }}"
+      shell: |
+        kubectl apply -f "{{ remote_repo_root }}/k8s/dev/postgres-dev.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/dev/dev-config.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/dev/backend-secret.rendered.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/dev/backend-dev.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/dev/frontend-dev.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/dev/traefik-ingress.yaml"
+      args:
+        executable: /bin/bash
+
+    - name: Apply prod manifests
+      become_user: "{{ k8s_vm_user }}"
+      shell: |
+        kubectl apply -f "{{ remote_repo_root }}/k8s/prod/prod-config.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/prod/backend-secret.rendered.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/prod/postgres-prod.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/prod/rbac-prod.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/prod/backend-prod.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/prod/frontend-prod.yaml"
+        kubectl apply -f "{{ remote_repo_root }}/k8s/prod/ingress-prod.yaml"
+      args:
+        executable: /bin/bash
+
+    - name: Verify namespaces and pods
+      become_user: "{{ k8s_vm_user }}"
+      shell: |
+        kubectl get ns
+        kubectl get pods -n dev
+        kubectl get pods -n prod
+      args:
+        executable: /bin/bash
+      changed_when: false

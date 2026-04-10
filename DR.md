@@ -31,6 +31,7 @@ Die ausführlichen Schritt-für-Schritt-Anleitungen sind in `deployment.md` doku
 - Infrastrukturcode: `main.tf`
 - Security-Prozess: `SECURITY.md`
 - Monitoring für Recovery-Verifikation: `monitoring/README.md`
+- Aktive DB-Persistenz und Backup-Jobs: `k8s/dev/postgres-dev.yaml`, `k8s/prod/postgres-prod.yaml`
 
 ## Verifikation
 

@@ -3,13 +3,14 @@ name: Security Scans
 on:
   push:
     branches:
-      - master
+      - main
       - dev
     paths:
       - "backend/**"
       - "frontend/**"
       - "k8s/**"
-      - "Dockerfile"
+      - "backend/Dockerfile"
+      - "frontend/Dockerfile"
       - "docker-compose*.yml"
       - ".github/workflows/security-scans.yml"
   pull_request:
@@ -17,7 +18,8 @@ on:
       - "backend/**"
       - "frontend/**"
       - "k8s/**"
-      - "Dockerfile"
+      - "backend/Dockerfile"
+      - "frontend/Dockerfile"
       - "docker-compose*.yml"
       - ".github/workflows/security-scans.yml"
   schedule:

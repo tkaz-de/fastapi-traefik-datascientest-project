@@ -11,9 +11,9 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAMESPACE: fastapi-liora
-  BACKEND_IMAGE: ghcr.io/fastapi-liora/fastapi-traefik-datascientest-project-backend
-  FRONTEND_IMAGE: ghcr.io/fastapi-liora/fastapi-traefik-datascientest-project-frontend
+  IMAGE_NAMESPACE: ${{ github.repository_owner }}
+  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/fastapi-traefik-datascientest-project-backend
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/fastapi-traefik-datascientest-project-frontend
 
 jobs:
   test:
@@ -168,12 +168,18 @@ jobs:
         with:
           version: latest
 
-      - name: Write kubeconfig
+      - name: Configure kubeconfig
+        env:
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG_DEV }}
         run: |
-          mkdir -p $HOME/.kube
-          printf '%s' "${{ secrets.KUBECONFIG_DEV }}" > $HOME/.kube/config-ci
-          chmod 600 $HOME/.kube/config-ci
-          echo "KUBECONFIG=$HOME/.kube/config-ci" >> $GITHUB_ENV
+          if [ -n "$KUBECONFIG_CONTENT" ]; then
+            mkdir -p $HOME/.kube
+            printf '%s' "$KUBECONFIG_CONTENT" > $HOME/.kube/config-ci
+            chmod 600 $HOME/.kube/config-ci
+            echo "KUBECONFIG=$HOME/.kube/config-ci" >> $GITHUB_ENV
+          else
+            echo "Using the self-hosted runner default kubeconfig."
+          fi
 
       - name: Verify kubectl and cluster access
         run: |

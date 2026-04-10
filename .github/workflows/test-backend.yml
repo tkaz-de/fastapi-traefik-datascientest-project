@@ -3,11 +3,20 @@ name: Test Backend
 on:
   push:
     branches:
-      - master
+      - main
+      - dev
+    paths:
+      - "backend/**"
+      - "docker-compose.yml"
+      - ".github/workflows/test-backend.yml"
   pull_request:
     types:
       - opened
       - synchronize
+    paths:
+      - "backend/**"
+      - "docker-compose.yml"
+      - ".github/workflows/test-backend.yml"
 
 jobs:
   test-backend:

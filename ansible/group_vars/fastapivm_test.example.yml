@@ -1,0 +1,13 @@
+# Copy this file to `ansible/group_vars/fastapivm_test.yml` before running
+# `ansible-playbook -i inventory.ini deploy-k8s-app.yml`.
+
+ghcr_username: "__REQUIRED_GHCR_USERNAME__"
+ghcr_token: "__REQUIRED_GHCR_TOKEN__"
+
+dev_postgres_password: "__REQUIRED_DEV_POSTGRES_PASSWORD__"
+dev_secret_key: "__REQUIRED_DEV_SECRET_KEY__"
+dev_first_superuser_password: "__REQUIRED_DEV_SUPERUSER_PASSWORD__"
+
+prod_postgres_password: "__REQUIRED_PROD_POSTGRES_PASSWORD__"
+prod_secret_key: "__REQUIRED_PROD_SECRET_KEY__"
+prod_first_superuser_password: "__REQUIRED_PROD_SUPERUSER_PASSWORD__"

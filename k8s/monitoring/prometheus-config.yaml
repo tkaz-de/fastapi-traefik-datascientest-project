@@ -29,7 +29,6 @@ data:
         static_configs:
           - targets:
               - backend.dev.svc.cluster.local:8000
-              - backend.staging.svc.cluster.local:8000
               - backend.prod.svc.cluster.local:8000
 
       - job_name: blackbox-db

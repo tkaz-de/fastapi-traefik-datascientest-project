@@ -12,7 +12,7 @@ terraform {
 # Sensible Werte per Umgebungsvariablen übergeben:
 # export TF_VAR_proxmox_endpoint="https://pve.example.com:8006/"
 # export TF_VAR_proxmox_api_token="terraform-user@pve!terraform-token=..."
-# export TF_VAR_vm_clone_ssh_public_key="ssh-rsa ..."
+# export TF_VAR_vm_clone_ssh_public_key="ssh-ed25519 ..."
 variable "proxmox_endpoint" {
   description = "Proxmox API endpoint URL"
   type        = string
@@ -27,6 +27,11 @@ variable "proxmox_api_token" {
 variable "vm_clone_ssh_public_key" {
   description = "SSH public key for cloned VM"
   type        = string
+}
+
+output "fastapi_vm_test_ip_hint" {
+  description = "Static inventory target currently used for the cloned Kubernetes VM"
+  value       = "10.10.10.51"
 }
 
 provider "proxmox" {

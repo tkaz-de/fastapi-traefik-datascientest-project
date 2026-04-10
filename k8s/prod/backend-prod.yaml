@@ -51,7 +51,7 @@ spec:
             - name: PORT
               value: "8000"
             - name: API_V1_STR
-              value: "/v1"
+              value: "/api/v1"
             - name: DOCS_URL
               value: "/docs"
             - name: OPENAPI_URL

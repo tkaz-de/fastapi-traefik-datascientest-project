@@ -1,0 +1,65 @@
+# Usage:
+# ansible-playbook -i inventory.ini bootstrap-k8s-vm.yml -K
+
+- name: Bootstrap Kubernetes VM with Docker, kubectl and Minikube
+  hosts: fastapivm_test
+  become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    k8s_vm_user: ipatsaf
+    kubectl_version: v1.30.2
+    minikube_version: v1.35.0
+
+  tasks:
+    - name: Update apt cache and upgrade packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+        cache_valid_time: 3600
+
+    - name: Install Docker and Kubernetes prerequisites
+      apt:
+        name:
+          - docker.io
+          - curl
+          - git
+          - rsync
+          - python3
+          - socat
+          - conntrack
+        state: present
+
+    - name: Add VM user to docker group
+      user:
+        name: "{{ k8s_vm_user }}"
+        groups: docker
+        append: yes
+
+    - name: Install kubectl
+      get_url:
+        url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: "0755"
+
+    - name: Install Minikube
+      get_url:
+        url: "https://storage.googleapis.com/minikube/releases/{{ minikube_version }}/minikube-linux-amd64"
+        dest: /usr/local/bin/minikube
+        mode: "0755"
+
+    - name: Check current Minikube status
+      become_user: "{{ k8s_vm_user }}"
+      command: minikube status --output=json
+      register: minikube_status
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Start Minikube when not already running
+      become_user: "{{ k8s_vm_user }}"
+      command: minikube start --driver=docker --cpus=2 --memory=3072 --addons=ingress
+      when: minikube_status.rc != 0 or '"Host": "Running"' not in minikube_status.stdout
+
+    - name: Verify kubectl access
+      become_user: "{{ k8s_vm_user }}"
+      command: kubectl get nodes
+      changed_when: false
