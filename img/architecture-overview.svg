@@ -1,112 +1,129 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="920" viewBox="0 0 1400 920">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">Architecture Overview</title>
+  <desc id="desc">Application, CI/CD, infrastructure, Kubernetes environments, monitoring, security, and disaster recovery for the maintained project path.</desc>
   <defs>
     <style>
-      .title { font: 700 26px Arial, sans-serif; fill: #0f172a; }
-      .section { font: 700 18px Arial, sans-serif; fill: #111827; }
-      .label { font: 14px Arial, sans-serif; fill: #111827; }
-      .small { font: 12px Arial, sans-serif; fill: #334155; }
-      .box { rx: 10; ry: 10; stroke-width: 2; }
-      .arrow { stroke: #334155; stroke-width: 2.2; fill: none; marker-end: url(#arrowhead); }
+      .bg { fill: #f8fafc; }
+      .panel-title { font: 700 28px 'Arial', sans-serif; fill: #0f172a; }
+      .section-title { font: 700 19px 'Arial', sans-serif; fill: #111827; }
+      .label { font: 600 15px 'Arial', sans-serif; fill: #111827; }
+      .text { font: 13px 'Arial', sans-serif; fill: #334155; }
+      .small { font: 12px 'Arial', sans-serif; fill: #475569; }
+      .box { rx: 14; ry: 14; stroke-width: 2; }
+      .arrow { stroke: #475569; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke-dasharray: 7 7; }
     </style>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#334155" />
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569" />
     </marker>
   </defs>
 
-  <rect x="0" y="0" width="1400" height="920" fill="#f8fafc" />
-  <text x="40" y="45" class="title">Systemarchitektur: App, CI/CD, Infrastruktur und Kubernetes</text>
+  <rect class="bg" x="0" y="0" width="1600" height="980" />
+  <text x="44" y="52" class="panel-title">Architecture Overview: Maintained Delivery Path</text>
 
-  <!-- Users -->
-  <rect x="40" y="90" width="220" height="90" class="box" fill="#dbeafe" stroke="#2563eb"/>
-  <text x="60" y="125" class="section">Nutzer</text>
-  <text x="60" y="152" class="label">Browser / API Consumer</text>
+  <rect x="36" y="84" width="1528" height="220" class="box" fill="#eef2ff" stroke="#4f46e5" />
+  <text x="60" y="118" class="section-title">Source Control and CI/CD</text>
 
-  <!-- Edge -->
-  <rect x="320" y="80" width="320" height="120" class="box" fill="#e2e8f0" stroke="#64748b"/>
-  <text x="340" y="112" class="section">Ingress / Edge</text>
-  <text x="340" y="138" class="label">Traefik / K8s Ingress</text>
-  <text x="340" y="162" class="small">TLS, Routing, Host Rules</text>
+  <rect x="70" y="148" width="230" height="92" class="box" fill="#e0e7ff" stroke="#4338ca" />
+  <text x="90" y="182" class="label">GitHub Repository</text>
+  <text x="90" y="205" class="text">Branches: dev, main</text>
+  <text x="90" y="226" class="text">Docs, app code, manifests</text>
 
-  <!-- Kubernetes Cluster -->
-  <rect x="700" y="60" width="650" height="520" class="box" fill="#ecfeff" stroke="#0891b2"/>
-  <text x="720" y="92" class="section">Kubernetes Cluster</text>
+  <rect x="350" y="148" width="310" height="92" class="box" fill="#ddd6fe" stroke="#7c3aed" />
+  <text x="370" y="182" class="label">GitHub Actions</text>
+  <text x="370" y="205" class="text">Lint, tests, security scans</text>
+  <text x="370" y="226" class="text">Backend CI, Compose test, deploy workflows</text>
 
-  <!-- Namespaces -->
-  <rect x="730" y="115" width="185" height="130" class="box" fill="#ccfbf1" stroke="#0f766e"/>
-  <text x="748" y="142" class="label">Namespace dev</text>
-  <text x="748" y="165" class="small">k8s/dev</text>
+  <rect x="710" y="148" width="220" height="92" class="box" fill="#ede9fe" stroke="#6d28d9" />
+  <text x="730" y="182" class="label">GHCR</text>
+  <text x="730" y="205" class="text">backend image</text>
+  <text x="730" y="226" class="text">frontend image</text>
 
-  <rect x="930" y="115" width="185" height="130" class="box" fill="#ccfbf1" stroke="#0f766e"/>
-  <text x="948" y="142" class="label">Namespace staging</text>
-  <text x="948" y="165" class="small">k8s/staging</text>
+  <rect x="980" y="148" width="250" height="92" class="box" fill="#dcfce7" stroke="#15803d" />
+  <text x="1000" y="182" class="label">Deploy Dev</text>
+  <text x="1000" y="205" class="text">Automatic from dev</text>
+  <text x="1000" y="226" class="text">Updates namespace: dev</text>
 
-  <rect x="1130" y="115" width="185" height="130" class="box" fill="#ccfbf1" stroke="#0f766e"/>
-  <text x="1148" y="142" class="label">Namespace prod</text>
-  <text x="1148" y="165" class="small">k8s/prod</text>
+  <rect x="1280" y="148" width="250" height="92" class="box" fill="#dbeafe" stroke="#2563eb" />
+  <text x="1300" y="182" class="label">Deploy Production</text>
+  <text x="1300" y="205" class="text">Manual approval gate</text>
+  <text x="1300" y="226" class="text">Updates namespace: prod</text>
 
-  <!-- App components -->
-  <rect x="760" y="280" width="230" height="120" class="box" fill="#fef9c3" stroke="#ca8a04"/>
-  <text x="778" y="310" class="label">Frontend Pod</text>
-  <text x="778" y="335" class="small">React + Nginx</text>
+  <path class="arrow" d="M300 194 L350 194" />
+  <path class="arrow" d="M660 194 L710 194" />
+  <path class="arrow" d="M930 194 L980 194" />
+  <path class="arrow" d="M930 214 L1280 214" />
 
-  <rect x="1020" y="280" width="230" height="120" class="box" fill="#fef9c3" stroke="#ca8a04"/>
-  <text x="1038" y="310" class="label">Backend Pod</text>
-  <text x="1038" y="335" class="small">FastAPI + Metrics</text>
+  <rect x="36" y="336" width="1000" height="434" class="box" fill="#ecfeff" stroke="#0891b2" />
+  <text x="60" y="370" class="section-title">Single VM Runtime</text>
+  <text x="60" y="392" class="text">Minikube cluster on one VM, namespace-separated environments</text>
 
-  <rect x="890" y="430" width="230" height="120" class="box" fill="#fee2e2" stroke="#dc2626"/>
-  <text x="908" y="460" class="label">PostgreSQL</text>
-  <text x="908" y="485" class="small">Persistent Storage</text>
+  <rect x="70" y="428" width="280" height="122" class="box" fill="#e2e8f0" stroke="#64748b" />
+  <text x="92" y="462" class="label">Ingress Layer</text>
+  <text x="92" y="486" class="text">Repository manifests: Traefik-oriented</text>
+  <text x="92" y="507" class="text">Local Minikube verification: NGINX ingress</text>
+  <text x="92" y="528" class="small">Frontend and backend health checks via ingress</text>
 
-  <!-- Monitoring -->
-  <rect x="40" y="300" width="600" height="280" class="box" fill="#f1f5f9" stroke="#475569"/>
-  <text x="60" y="332" class="section">Monitoring</text>
+  <rect x="392" y="428" width="288" height="282" class="box" fill="#ccfbf1" stroke="#0f766e" />
+  <text x="416" y="462" class="label">Namespace: dev</text>
+  <text x="416" y="486" class="text">Frontend deployment</text>
+  <text x="416" y="507" class="text">Backend deployment</text>
+  <text x="416" y="528" class="text">PostgreSQL + PVC</text>
+  <text x="416" y="549" class="text">Backup PVC + CronJob</text>
+  <text x="416" y="570" class="small">Automatic target for branch dev</text>
 
-  <rect x="70" y="360" width="250" height="95" class="box" fill="#d9f99d" stroke="#65a30d"/>
-  <text x="90" y="392" class="label">Prometheus</text>
-  <text x="90" y="416" class="small">Scrape /metrics</text>
+  <rect x="718" y="428" width="282" height="282" class="box" fill="#cffafe" stroke="#0e7490" />
+  <text x="742" y="462" class="label">Namespace: prod</text>
+  <text x="742" y="486" class="text">Frontend deployment</text>
+  <text x="742" y="507" class="text">Backend deployment</text>
+  <text x="742" y="528" class="text">PostgreSQL + PVC</text>
+  <text x="742" y="549" class="text">Backup PVC + CronJob</text>
+  <text x="742" y="570" class="text">RBAC + TLS ingress</text>
+  <text x="742" y="591" class="small">Manual approval before deployment</text>
 
-  <rect x="350" y="360" width="250" height="95" class="box" fill="#fde68a" stroke="#d97706"/>
-  <text x="370" y="392" class="label">Grafana</text>
-  <text x="370" y="416" class="small">Dashboards & Alerts</text>
+  <path class="arrow" d="M210 550 L392 550" />
+  <path class="arrow" d="M210 580 L718 580" />
 
-  <!-- CI/CD -->
-  <rect x="40" y="620" width="1310" height="250" class="box" fill="#eef2ff" stroke="#4f46e5"/>
-  <text x="60" y="652" class="section">CI/CD & Infrastruktur</text>
+  <rect x="1070" y="336" width="494" height="434" class="box" fill="#f8fafc" stroke="#475569" />
+  <text x="1094" y="370" class="section-title">Observability, Security, and Recovery</text>
 
-  <rect x="70" y="680" width="220" height="90" class="box" fill="#e0e7ff" stroke="#4338ca"/>
-  <text x="88" y="712" class="label">GitHub Repository</text>
-  <text x="88" y="736" class="small">Code + Manifests</text>
+  <rect x="1104" y="424" width="424" height="110" class="box" fill="#d9f99d" stroke="#65a30d" />
+  <text x="1126" y="458" class="label">Monitoring Stack</text>
+  <text x="1126" y="482" class="text">Prometheus, Grafana, Alertmanager, Blackbox Exporter</text>
+  <text x="1126" y="503" class="text">Backend metrics, target health, dashboards, alerts</text>
 
-  <rect x="320" y="680" width="250" height="90" class="box" fill="#e0e7ff" stroke="#4338ca"/>
-  <text x="338" y="712" class="label">GitHub Actions</text>
-  <text x="338" y="736" class="small">Build, Test, Security Scan</text>
+  <rect x="1104" y="560" width="424" height="86" class="box" fill="#fee2e2" stroke="#dc2626" />
+  <text x="1126" y="594" class="label">Security Controls</text>
+  <text x="1126" y="618" class="text">CodeQL, Trivy, Dependabot, Kubernetes Secrets, TLS, RBAC</text>
 
-  <rect x="600" y="680" width="200" height="90" class="box" fill="#ddd6fe" stroke="#6d28d9"/>
-  <text x="618" y="712" class="label">GHCR</text>
-  <text x="618" y="736" class="small">Container Registry</text>
+  <rect x="1104" y="668" width="424" height="86" class="box" fill="#fde68a" stroke="#d97706" />
+  <text x="1126" y="702" class="label">Disaster Recovery</text>
+  <text x="1126" y="726" class="text">Daily DB backups, restore path, PVC persistence, rollback runbooks</text>
 
-  <rect x="830" y="680" width="250" height="90" class="box" fill="#e0f2fe" stroke="#0369a1"/>
-  <text x="848" y="712" class="label">Deploy Workflows</text>
-  <text x="848" y="736" class="small">dev / staging / prod</text>
+  <path class="arrow" d="M1000 520 L1104 470" />
+  <path class="arrow" d="M1000 590 L1104 603" />
+  <path class="arrow" d="M1000 650 L1104 711" />
 
-  <rect x="1110" y="680" width="220" height="90" class="box" fill="#dcfce7" stroke="#15803d"/>
-  <text x="1128" y="712" class="label">Terraform / IaC</text>
-  <text x="1128" y="736" class="small">main.tf + Cloud Infra</text>
+  <rect x="36" y="804" width="1528" height="136" class="box" fill="#fff7ed" stroke="#c2410c" />
+  <text x="60" y="838" class="section-title">Infrastructure Layer</text>
 
-  <!-- Arrows -->
-  <path d="M260 135 L320 135" class="arrow"/>
-  <path d="M640 140 L760 140" class="arrow"/>
-  <path d="M870 245 L870 280" class="arrow"/>
-  <path d="M1080 245 L1135 280" class="arrow"/>
-  <path d="M990 340 L1020 340" class="arrow"/>
-  <path d="M1135 400 L1040 430" class="arrow"/>
-  <path d="M200 455 L760 340" class="arrow"/>
-  <path d="M320 405 L350 405" class="arrow"/>
-  <path d="M460 455 L1020 340" class="arrow"/>
+  <rect x="88" y="856" width="300" height="56" class="box" fill="#ffedd5" stroke="#ea580c" />
+  <text x="110" y="890" class="label">Terraform</text>
+  <text x="220" y="890" class="text">VM provisioning definitions</text>
 
-  <path d="M290 725 L320 725" class="arrow"/>
-  <path d="M570 725 L600 725" class="arrow"/>
-  <path d="M800 725 L830 725" class="arrow"/>
-  <path d="M1080 725 L1130 725" class="arrow"/>
-  <path d="M955 680 L1025 580" class="arrow"/>
+  <rect x="446" y="856" width="300" height="56" class="box" fill="#ffedd5" stroke="#ea580c" />
+  <text x="468" y="890" class="label">Ansible</text>
+  <text x="560" y="890" class="text">VM bootstrap and cluster preparation</text>
+
+  <rect x="804" y="856" width="340" height="56" class="box" fill="#ffedd5" stroke="#ea580c" />
+  <text x="826" y="890" class="label">Kubernetes Manifests</text>
+  <text x="1008" y="890" class="text">dev, prod, monitoring</text>
+
+  <rect x="1202" y="856" width="310" height="56" class="box" fill="#ffedd5" stroke="#ea580c" />
+  <text x="1224" y="890" class="label">Project Documentation</text>
+  <text x="1384" y="890" class="text">README, SECURITY, DR, deployment</text>
+
+  <path class="arrow dashed" d="M596 856 L596 770" />
+  <path class="arrow dashed" d="M974 856 L974 770" />
+  <path class="arrow dashed" d="M1320 856 L1320 770" />
 </svg>
