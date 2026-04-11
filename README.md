@@ -31,7 +31,7 @@ The platform contains:
 
 The mandatory architecture diagram is available here:
 
-- [img/architecture-overview.svg](/home/tkaz1/projects/fastapi-traefik-datascientest-project/img/architecture-overview.svg)
+- [img/architecture-overview.svg](img/architecture-overview.svg)
 
 At a high level:
 
@@ -76,10 +76,10 @@ For the current single-VM Minikube implementation, `prod` is locally run with on
 
 Key environment differences are defined in:
 
-- [k8s/dev/dev-config.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/dev/dev-config.yaml)
-- [k8s/prod/prod-config.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/prod/prod-config.yaml)
-- [k8s/dev/backend-dev.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/dev/backend-dev.yaml)
-- [k8s/prod/backend-prod.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/prod/backend-prod.yaml)
+- [k8s/dev/dev-config.yaml](k8s/dev/dev-config.yaml)
+- [k8s/prod/prod-config.yaml](k8s/prod/prod-config.yaml)
+- [k8s/dev/backend-dev.yaml](k8s/dev/backend-dev.yaml)
+- [k8s/prod/backend-prod.yaml](k8s/prod/backend-prod.yaml)
 
 ## Running the Project Locally with Docker
 
@@ -97,15 +97,15 @@ docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 Relevant files:
 
-- [docker-compose.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/docker-compose.yml)
-- [docker-compose.monitoring.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/docker-compose.monitoring.yml)
+- [docker-compose.yml](docker-compose.yml)
+- [docker-compose.monitoring.yml](docker-compose.monitoring.yml)
 
 ## Docker Images
 
 Both application components are containerized:
 
-- Backend image: [backend/Dockerfile](/home/tkaz1/projects/fastapi-traefik-datascientest-project/backend/Dockerfile)
-- Frontend image: [frontend/Dockerfile](/home/tkaz1/projects/fastapi-traefik-datascientest-project/frontend/Dockerfile)
+- Backend image: [backend/Dockerfile](backend/Dockerfile)
+- Frontend image: [frontend/Dockerfile](frontend/Dockerfile)
 
 The maintained registry target is GHCR under the current GitHub repository owner:
 
@@ -133,13 +133,13 @@ They include:
 
 Primary manifest entrypoints:
 
-- [k8s/dev/dev-namespace.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/dev/dev-namespace.yaml)
-- [k8s/prod/prod-namespace.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/prod/prod-namespace.yaml)
-- [k8s/dev/postgres-dev.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/dev/postgres-dev.yaml)
-- [k8s/prod/postgres-prod.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/prod/postgres-prod.yaml)
-- [k8s/dev/traefik-ingress.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/dev/traefik-ingress.yaml)
-- [k8s/prod/ingress-prod.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/prod/ingress-prod.yaml)
-- [k8s/prod/rbac-prod.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/prod/rbac-prod.yaml)
+- [k8s/dev/dev-namespace.yaml](k8s/dev/dev-namespace.yaml)
+- [k8s/prod/prod-namespace.yaml](k8s/prod/prod-namespace.yaml)
+- [k8s/dev/postgres-dev.yaml](k8s/dev/postgres-dev.yaml)
+- [k8s/prod/postgres-prod.yaml](k8s/prod/postgres-prod.yaml)
+- [k8s/dev/traefik-ingress.yaml](k8s/dev/traefik-ingress.yaml)
+- [k8s/prod/ingress-prod.yaml](k8s/prod/ingress-prod.yaml)
+- [k8s/prod/rbac-prod.yaml](k8s/prod/rbac-prod.yaml)
 
 Operational note:
 
@@ -156,10 +156,10 @@ The repository contains multiple test layers:
 
 Representative paths:
 
-- [backend/app/tests/api/routes/test_users.py](/home/tkaz1/projects/fastapi-traefik-datascientest-project/backend/app/tests/api/routes/test_users.py)
-- [backend/app/tests/crud/test_user.py](/home/tkaz1/projects/fastapi-traefik-datascientest-project/backend/app/tests/crud/test_user.py)
-- [frontend/tests/unit/example.test.ts](/home/tkaz1/projects/fastapi-traefik-datascientest-project/frontend/tests/unit/example.test.ts)
-- [frontend/tests/e2e/login.spec.ts](/home/tkaz1/projects/fastapi-traefik-datascientest-project/frontend/tests/e2e/login.spec.ts)
+- [backend/app/tests/api/routes/test_users.py](backend/app/tests/api/routes/test_users.py)
+- [backend/app/tests/crud/test_user.py](backend/app/tests/crud/test_user.py)
+- [frontend/tests/unit/example.test.ts](frontend/tests/unit/example.test.ts)
+- [frontend/tests/e2e/login.spec.ts](frontend/tests/e2e/login.spec.ts)
 
 ## CI/CD
 
@@ -173,10 +173,10 @@ The maintained pipeline path is:
 
 Primary workflows:
 
-- [deploy-dev.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/.github/workflows/deploy-dev.yml)
-- [deploy-production.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/.github/workflows/deploy-production.yml)
-- [security-scans.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/.github/workflows/security-scans.yml)
-- [playwright.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/.github/workflows/playwright.yml)
+- [deploy-dev.yml](.github/workflows/deploy-dev.yml)
+- [deploy-production.yml](.github/workflows/deploy-production.yml)
+- [security-scans.yml](.github/workflows/security-scans.yml)
+- [playwright.yml](.github/workflows/playwright.yml)
 
 Support workflows exist for focused validation, but the branching and deployment standard for the project is `dev -> prod`.
 
@@ -184,14 +184,14 @@ Support workflows exist for focused validation, but the branching and deployment
 
 Terraform provisions the VM layer. For the implemented requirement path, Kubernetes is currently demonstrated on a single VM via Minikube; the Terraform VM definitions remain available as the reproducible VM layer:
 
-- [main.tf](/home/tkaz1/projects/fastapi-traefik-datascientest-project/main.tf)
+- [main.tf](main.tf)
 
 Ansible assets for VM bootstrap remain available:
 
-- [ansible/setup-vm.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/ansible/setup-vm.yml)
-- [ansible/bootstrap-k8s-vm.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/ansible/bootstrap-k8s-vm.yml)
-- [ansible/deploy-k8s-app.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/ansible/deploy-k8s-app.yml)
-- [ansible/group_vars/fastapivm_test.example.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/ansible/group_vars/fastapivm_test.example.yml)
+- [ansible/setup-vm.yml](ansible/setup-vm.yml)
+- [ansible/bootstrap-k8s-vm.yml](ansible/bootstrap-k8s-vm.yml)
+- [ansible/deploy-k8s-app.yml](ansible/deploy-k8s-app.yml)
+- [ansible/group_vars/fastapivm_test.example.yml](ansible/group_vars/fastapivm_test.example.yml)
 
 This keeps infrastructure reproducible instead of manually assembled.
 
@@ -201,9 +201,9 @@ Monitoring is implemented with Prometheus and Grafana, with Alertmanager wiring 
 
 Main references:
 
-- [monitoring/README.md](/home/tkaz1/projects/fastapi-traefik-datascientest-project/monitoring/README.md)
-- [k8s/monitoring/prometheus-deployment.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/monitoring/prometheus-deployment.yaml)
-- [k8s/monitoring/grafana.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/monitoring/grafana.yaml)
+- [monitoring/README.md](monitoring/README.md)
+- [k8s/monitoring/prometheus-deployment.yaml](k8s/monitoring/prometheus-deployment.yaml)
+- [k8s/monitoring/grafana.yaml](k8s/monitoring/grafana.yaml)
 
 ## Security Considerations
 
@@ -218,10 +218,10 @@ The maintained security controls include at least three required layers:
 
 Main references:
 
-- [SECURITY.md](/home/tkaz1/projects/fastapi-traefik-datascientest-project/SECURITY.md)
-- [.github/dependabot.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/.github/dependabot.yml)
-- [k8s/prod/ingress-prod.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/prod/ingress-prod.yaml)
-- [k8s/prod/rbac-prod.yaml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/k8s/prod/rbac-prod.yaml)
+- [SECURITY.md](SECURITY.md)
+- [.github/dependabot.yml](.github/dependabot.yml)
+- [k8s/prod/ingress-prod.yaml](k8s/prod/ingress-prod.yaml)
+- [k8s/prod/rbac-prod.yaml](k8s/prod/rbac-prod.yaml)
 
 ## Disaster Recovery
 
@@ -235,8 +235,8 @@ Disaster recovery is documented around:
 
 Main references:
 
-- [DR.md](/home/tkaz1/projects/fastapi-traefik-datascientest-project/DR.md)
-- [deployment.md](/home/tkaz1/projects/fastapi-traefik-datascientest-project/deployment.md)
+- [DR.md](DR.md)
+- [deployment.md](deployment.md)
 
 The Kubernetes implementation now includes:
 
@@ -248,10 +248,10 @@ The Kubernetes implementation now includes:
 
 Detailed operational documentation remains in:
 
-- [deployment.md](/home/tkaz1/projects/fastapi-traefik-datascientest-project/deployment.md)
-- [development.md](/home/tkaz1/projects/fastapi-traefik-datascientest-project/development.md)
-- [backend/README.md](/home/tkaz1/projects/fastapi-traefik-datascientest-project/backend/README.md)
-- [frontend/README.md](/home/tkaz1/projects/fastapi-traefik-datascientest-project/frontend/README.md)
+- [deployment.md](deployment.md)
+- [development.md](development.md)
+- [backend/README.md](backend/README.md)
+- [frontend/README.md](frontend/README.md)
 
 ## Verification
 

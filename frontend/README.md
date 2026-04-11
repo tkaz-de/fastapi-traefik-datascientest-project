@@ -125,7 +125,7 @@ The frontend code is structured as follows:
 
 The frontend includes end-to-end tests using Playwright.
 
-The maintained execution path is the GitHub Actions workflow [playwright.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/.github/workflows/playwright.yml).
+The maintained execution path is the GitHub Actions workflow [playwright.yml](../.github/workflows/playwright.yml).
 
 For local runs, make sure:
 
