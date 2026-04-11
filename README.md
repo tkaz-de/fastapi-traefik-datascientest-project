@@ -150,15 +150,14 @@ Operational note:
 
 The repository contains multiple test layers:
 
-- Backend unit tests
-- Backend integration tests
+- Backend API, CRUD, and script-level tests
 - Frontend unit tests
 - Frontend end-to-end tests with Playwright
 
 Representative paths:
 
-- [backend/tests/unit/test_users.py](/home/tkaz1/projects/fastapi-traefik-datascientest-project/backend/tests/unit/test_users.py)
-- [backend/tests/integration/test_user.py](/home/tkaz1/projects/fastapi-traefik-datascientest-project/backend/tests/integration/test_user.py)
+- [backend/app/tests/api/routes/test_users.py](/home/tkaz1/projects/fastapi-traefik-datascientest-project/backend/app/tests/api/routes/test_users.py)
+- [backend/app/tests/crud/test_user.py](/home/tkaz1/projects/fastapi-traefik-datascientest-project/backend/app/tests/crud/test_user.py)
 - [frontend/tests/unit/example.test.ts](/home/tkaz1/projects/fastapi-traefik-datascientest-project/frontend/tests/unit/example.test.ts)
 - [frontend/tests/e2e/login.spec.ts](/home/tkaz1/projects/fastapi-traefik-datascientest-project/frontend/tests/e2e/login.spec.ts)
 
@@ -264,7 +263,7 @@ The current single-VM Minikube implementation has been verified with:
 - Prometheus scrape targets `backend.dev`, `backend.prod`, `blackbox-db`, and `prometheus` reporting `up`
 - Grafana datasource and `Backend Overview` dashboard provisioned from Kubernetes manifests
 - PostgreSQL backup CronJobs present in `dev` and `prod`, with a successful manual backup job confirmed in `dev`
-- backend unit smoke tests passing via `uv run pytest tests/unit/test_models_unit.py`
+- backend test execution passing via `bash scripts/ci-backend-checks.sh`
 - frontend unit tests passing via `npm run test:unit`
 
 ## Current Delivery Scope

@@ -1,5 +1,9 @@
 # Release Notes
 
+This file is inherited from the upstream FastAPI template and is kept only as historical reference material. It is not the authoritative release history for this repository.
+
+For this project, use Git tags, commit history, and GitHub releases in the current repository as the actual source of truth.
+
 ## Latest Changes
 
 ### Fixes

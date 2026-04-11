@@ -4,9 +4,9 @@ This document consolidates the DR requirements and links to the operational runb
 
 ## Scope
 
-- Backend API, Frontend, Datenbank, Kubernetes-Ressourcen
-- CI/CD-Artefakte (Container Images in GHCR)
-- Infrastrukturkonfiguration (Kubernetes Manifeste, Terraform)
+- Backend API, frontend, database, Kubernetes resources
+- CI/CD artifacts (container images in GHCR)
+- Infrastructure configuration (Kubernetes manifests, Terraform)
 
 ## Goals
 
@@ -27,11 +27,11 @@ The detailed step-by-step procedures are documented in `deployment.md`:
 
 ## Artifacts & Responsibilities
 
-- Kubernetes Manifeste: `k8s/dev`, `k8s/staging`, `k8s/prod`
-- Infrastrukturcode: `main.tf`
-- Security-Prozess: `SECURITY.md`
+- Kubernetes manifests: `k8s/dev`, `k8s/staging`, `k8s/prod`
+- Infrastructure code: `main.tf`
+- Security process: `SECURITY.md`
 - Monitoring for recovery verification: `monitoring/README.md`
-- Aktive DB-Persistenz und Backup-Jobs: `k8s/dev/postgres-dev.yaml`, `k8s/prod/postgres-prod.yaml`
+- Active DB persistence and backup jobs: `k8s/dev/postgres-dev.yaml`, `k8s/prod/postgres-prod.yaml`
 
 ## Verification
 

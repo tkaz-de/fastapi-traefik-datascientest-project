@@ -12,9 +12,7 @@ You are encouraged to write tests for your application and update your versions 
 
 ## Reporting a Vulnerability
 
-If you think you found a vulnerability, and even if you are not sure about it, please report it right away by sending an email to: security@tiangolo.com. Please try to be as explicit as possible, describing all the steps and example code to reproduce the security issue.
-
-I (the author, [@tiangolo](https://twitter.com/tiangolo)) will review it thoroughly and get back to you.
+If you think you found a vulnerability, and even if you are not fully sure, report it privately to the repository maintainers. Use GitHub's private vulnerability reporting flow if it is enabled for the repository; otherwise use a non-public maintainer contact channel. Please be as explicit as possible and include reproduction steps and example code where relevant.
 
 ## Public Discussions
 
@@ -33,7 +31,7 @@ The community and I thank you for that. 🙇
 
 Security scans run in GitHub Actions workflow `.github/workflows/security-scans.yml` on:
 
-- every push to `master` and `dev` (for backend/frontend/k8s/workflow changes),
+- every push to `main` and `dev` (for backend/frontend/k8s/workflow changes),
 - every pull request touching the same areas,
 - every Monday at 03:00 UTC (scheduled baseline scan),
 - manual trigger (`workflow_dispatch`).

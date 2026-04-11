@@ -59,8 +59,6 @@ If you are developing an API-only app and want to remove the frontend, you can d
 
 * In the `docker-compose.yml` file, remove the whole service / section `frontend`.
 
-* In the `docker-compose.override.yml` file, remove the whole service / section `frontend` and `playwright`.
-
 Done, you have a frontend-less (api-only) app. 🤓
 
 ---
@@ -89,7 +87,7 @@ But it would be only to clean them up, leaving them won't really have any effect
 
 * Start the Docker Compose stack.
 
-* Download the OpenAPI JSON file from `http://localhost/api/v1/openapi.json` and copy it to a new file `openapi.json` at the root of the `frontend` directory.
+* Download the OpenAPI JSON file from `http://localhost:8000/api/v1/openapi.json` and copy it to a new file `openapi.json` at the root of the `frontend` directory.
 
 * To generate the frontend client, run:
 
@@ -125,13 +123,24 @@ The frontend code is structured as follows:
 
 ## End-to-End Testing with Playwright
 
-The frontend includes initial end-to-end tests using Playwright. To run the tests, you need to have the Docker Compose stack running. Start the stack with the following command:
+The frontend includes end-to-end tests using Playwright.
+
+The maintained execution path is the GitHub Actions workflow [playwright.yml](/home/tkaz1/projects/fastapi-traefik-datascientest-project/.github/workflows/playwright.yml).
+
+For local runs, make sure:
+
+- the backend API is reachable at the `VITE_API_URL` value from the environment,
+- the frontend dev server can start on `http://localhost:5173`,
+- email-related tests have a reachable `MAILCATCHER_HOST` if you run the reset-password flow.
+
+One practical local setup is:
 
 ```bash
-docker compose up -d --wait backend
+docker compose up -d --wait db backend
+npm run dev
 ```
 
-Then, you can run the tests with the following command:
+Then run the tests with:
 
 ```bash
 npx playwright test
@@ -143,7 +152,7 @@ You can also run your tests in UI mode to see the browser and interact with it r
 npx playwright test --ui
 ```
 
-To stop and remove the Docker Compose stack and clean the data created in tests, use the following command:
+To stop and remove the Docker Compose stack and clean the data created in tests, use:
 
 ```bash
 docker compose down -v

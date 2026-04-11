@@ -217,7 +217,7 @@ With the environment variables in place, you can deploy with Docker Compose:
 docker compose -f docker-compose.yml up -d
 ```
 
-For production you wouldn't want to have the overrides in `docker-compose.override.yml`, that's why we explicitly specify `docker-compose.yml` as the file to use.
+For the maintained repository path, the Docker Compose deployment examples rely on the base `docker-compose.yml` only, so the command explicitly targets that file.
 
 ## Continuous Deployment (CD)
 

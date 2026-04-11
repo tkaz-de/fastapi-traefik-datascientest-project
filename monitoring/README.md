@@ -52,7 +52,7 @@ Examples:
 
 ### Infrastructure / Reachability Metrics
 
-- `up{job="backend"}` aus Prometheus-Scrape.
+- `up{job="backend"}` from Prometheus scraping.
 - `probe_success{job="blackbox-db"}` from Blackbox Exporter (TCP check against the PostgreSQL endpoint).
 
 ## 3) Baseline Alerts (required)
@@ -66,8 +66,8 @@ The alert rules are defined in `k8s/monitoring/prometheus-config.yaml` and cover
 
 ## 4) Dashboards
 
-- Standard-Dashboard-Datei: `monitoring/grafana/dashboards/backend-overview.json`
-- Provisioning-Dateien:
+- Standard dashboard file: `monitoring/grafana/dashboards/backend-overview.json`
+- Provisioning files:
   - `monitoring/grafana/provisioning/datasources/datasource.yml`
   - `monitoring/grafana/provisioning/dashboards/dashboards.yml`
 
@@ -95,6 +95,6 @@ docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 ```
 
 Verify:
-- Backend-Metriken: `curl http://localhost:8000/metrics`
+- Backend metrics: `curl http://localhost:8000/metrics`
 - Prometheus Targets: `http://localhost:9090/targets`
 - Grafana: `http://localhost:3000` (`admin` / `admin`)
