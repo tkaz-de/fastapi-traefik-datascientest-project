@@ -3,7 +3,7 @@ from __future__ import annotations
 import threading
 import time
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import PlainTextResponse
@@ -15,7 +15,7 @@ _LOCK = threading.Lock()
 
 
 def _escape_label(value: str) -> str:
-    return value.replace("\\", r"\\").replace('"', r'\"').replace("\n", r"\n")
+    return value.replace("\\", r"\\").replace('"', r"\"").replace("\n", r"\n")
 
 
 def _render_metrics() -> str:
@@ -57,7 +57,9 @@ async def metrics_endpoint() -> PlainTextResponse:
 
 def setup_metrics(app: FastAPI) -> None:
     @app.middleware("http")
-    async def collect_metrics(request: Request, call_next: Callable[..., Response]) -> Response:
+    async def collect_metrics(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         response = await call_next(request)
 
         route = request.scope.get("route")
@@ -70,4 +72,10 @@ def setup_metrics(app: FastAPI) -> None:
 
         return response
 
-    app.add_api_route("/metrics", metrics_endpoint, methods=["GET"], include_in_schema=False, tags=["monitoring"])
+    app.add_api_route(
+        "/metrics",
+        metrics_endpoint,
+        methods=["GET"],
+        include_in_schema=False,
+        tags=["monitoring"],
+    )
