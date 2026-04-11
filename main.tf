@@ -1,4 +1,4 @@
-# Terraform Konfiguration für zwei VMs (Prod & Test)
+# Terraform configuration for two VMs (prod and test)
 
 terraform {
   required_providers {
@@ -9,7 +9,7 @@ terraform {
   }
 }
 
-# Sensible Werte per Umgebungsvariablen übergeben:
+# Pass sensitive values through environment variables:
 # export TF_VAR_proxmox_endpoint="https://pve.example.com:8006/"
 # export TF_VAR_proxmox_api_token="terraform-user@pve!terraform-token=..."
 # export TF_VAR_vm_clone_ssh_public_key="ssh-ed25519 ..."

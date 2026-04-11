@@ -409,21 +409,21 @@ Because previous plaintext values were present in repository history, rotate out
 
 After rotation, update only secret stores (GitHub Secrets, vault, Kubernetes sealed secret inputs), not tracked files.
 
-## Kubernetes-Umgebungen `dev` vs. `prod`
+## Kubernetes Environments `dev` vs. `prod`
 
-Die Kubernetes-Manifeste sind jetzt strikt getrennt unter:
+The Kubernetes manifests are now strictly separated under:
 
-- `k8s/dev/` für Branch-Deployments aus `dev`
-- `k8s/prod/` für Release-Deployments (`release.published`)
+- `k8s/dev/` for branch deployments from `dev`
+- `k8s/prod/` for release deployments (`release.published`)
 
-### Unterschiede in Variablen und Werten
+### Differences in Variables and Values
 
 | Bereich | Dev (`k8s/dev`) | Prod (`k8s/prod`) |
 |---|---|---|
 | Namespace | `dev` | `prod` |
 | Backend Image (Manifest-Default) | `...-backend:dev` | `...-backend:prod` |
 | Frontend Image (Manifest-Default) | `...-frontend:dev` | `...-frontend:prod` |
-| Deployment Replikate | Backend `1`, Frontend `1` | Backend `3`, Frontend `3` |
+| Deployment Replicas | Backend `1`, Frontend `1` | Backend `3`, Frontend `3` |
 | Backend Limits | `500m` CPU / `512Mi` RAM | `1000m` CPU / `1Gi` RAM |
 | Backend Requests | `250m` CPU / `256Mi` RAM | `500m` CPU / `512Mi` RAM |
 | Frontend Limits | `250m` CPU / `256Mi` RAM | `500m` CPU / `512Mi` RAM |
@@ -436,9 +436,9 @@ Die Kubernetes-Manifeste sind jetzt strikt getrennt unter:
 | Ingress Host | `dev.fastapi.local` | `app.example.com` |
 | Ingress Entrypoint | `web` | `websecure` |
 
-### Label- und Selector-Konvention
+### Label and Selector Convention
 
-In beiden Umgebungen werden konsistent diese Labels verwendet:
+The following labels are used consistently in both environments:
 
 - `app.kubernetes.io/name: fastapi-traefik-datascientest-project`
 - `app.kubernetes.io/component: backend|frontend|edge`
@@ -446,32 +446,32 @@ In beiden Umgebungen werden konsistent diese Labels verwendet:
 - `app.kubernetes.io/environment: dev|prod`
 - `app.kubernetes.io/managed-by: github-actions`
 
-Die `spec.selector.matchLabels` in Deployments und die Service-Selector referenzieren denselben Label-Satz (`name`, `component`, `environment`), sodass Pod-Discovery zwischen den Umgebungen deterministisch bleibt.
+The `spec.selector.matchLabels` entries in Deployments and the Service selectors reference the same label set (`name`, `component`, `environment`), so pod discovery remains deterministic across environments.
 
-### CI/CD-Zielzuordnung
+### CI/CD Target Mapping
 
-- Workflow `.github/workflows/deploy-dev.yml` rollt **nur** bei Push auf Branch `dev` nach Namespace `dev` aus.
-- Workflow `.github/workflows/deploy-production.yml` rollt **nur** bei `release.published` nach Namespace `prod` aus.
-- Beide Workflows wenden zuerst die jeweiligen Verzeichnis-Manifeste (`k8s/dev` oder `k8s/prod`) an und aktualisieren danach die Images per Tag (`sha` für dev, Release-Tag für prod).
+- Workflow `.github/workflows/deploy-dev.yml` deploys **only** on pushes to branch `dev` into namespace `dev`.
+- Workflow `.github/workflows/deploy-production.yml` deploys **only** on `release.published` into namespace `prod`.
+- Both workflows first apply the respective manifest directories (`k8s/dev` or `k8s/prod`) and then update images by tag (`sha` for dev, release tag for prod).
 
 ## Disaster Recovery (DR) – Runbooks
 
-Dieses Kapitel definiert verbindliche Runbooks für Ausfälle in Kubernetes- und Infrastruktur-Betrieb.
+This section defines mandatory runbooks for failures in Kubernetes and infrastructure operations.
 
-### 1) Backup-Strategie (Datenbank + Persistent Volumes)
+### 1) Backup Strategy (Database + Persistent Volumes)
 
-#### 1.1 PostgreSQL-Backups
+#### 1.1 PostgreSQL Backups
 
-- **Täglich 02:00 UTC**: logischer Full-Backup via `pg_dump` (komprimiert).
-- **Alle 15 Minuten**: WAL-Archivierung für Point-in-Time-Recovery (PITR).
-- **Aufbewahrung**:
-  - Tages-Backups: **14 Tage**
-  - Wochen-Backups (Sonntag): **8 Wochen**
-  - Monats-Backups (1. Tag): **12 Monate**
-- **Ablage**: externer Objektspeicher (S3-kompatibel) mit Bucket-Versionierung und Server-Side-Encryption.
-- **Integritätsprüfung**: nach jedem Upload Checksum-Verifikation (z. B. SHA256) und Job-Status in Monitoring.
+- **Daily 02:00 UTC**: logical full backup via `pg_dump` (compressed).
+- **Every 15 minutes**: WAL archiving for point-in-time recovery (PITR).
+- **Retention**:
+  - daily backups: **14 days**
+  - weekly backups (Sunday): **8 weeks**
+  - monthly backups (1st day): **12 months**
+- **Storage**: external object storage (S3-compatible) with bucket versioning and server-side encryption.
+- **Integrity check**: checksum verification (for example SHA256) after each upload and job status in monitoring.
 
-Beispiel-Kommandos (ausgeführt durch CronJob/Backup-Job):
+Example commands (executed by the CronJob/backup job):
 
 ```bash
 pg_dump --format=custom --no-owner --no-privileges \
@@ -483,101 +483,101 @@ pg_dump --format=custom --no-owner --no-privileges \
 pg_restore --list "/backup/db/app_YYYY-MM-DD_HHMM.dump.gz" >/dev/null
 ```
 
-#### 1.2 Persistent-Volume-Backups
+#### 1.2 Persistent Volume Backups
 
-- **Täglich 03:00 UTC**: Snapshot aller produktiven PVCs (Datei-Uploads, Reports, sonstige stateful Artefakte).
-- **Aufbewahrung**:
-  - tägliche Snapshots: **7 Tage**
-  - wöchentliche Snapshots: **6 Wochen**
-- **Technik**: CSI VolumeSnapshots oder Storage-Provider-Snapshots (je nach Cluster).
-- **Wiederherstellungspunkt** wird pro Snapshot versioniert dokumentiert (Snapshot-ID + Timestamp).
+- **Daily 03:00 UTC**: snapshot of all production PVCs (file uploads, reports, and other stateful artifacts).
+- **Retention**:
+  - daily snapshots: **7 days**
+  - weekly snapshots: **6 weeks**
+- **Technology**: CSI VolumeSnapshots or storage provider snapshots, depending on the cluster.
+- **Restore point** is documented version-by-version for each snapshot (snapshot ID + timestamp).
 
-#### 1.3 Restore-Tests (verpflichtend)
+#### 1.3 Restore Tests (mandatory)
 
-- **Monatlich (1x)**: vollständiger Restore-Test in isolierter `dr-test` Namespace/Umgebung.
-- **Pro Quartal (1x)**: kombinierter Restore-Test (DB + PV + Anwendung) mit Smoke-Test.
-- **Erfolgskriterium**: Applikation startet, Healthchecks OK, Login + kritischer Geschäftsvorgang erfolgreich.
-- **Nachweis**: Protokoll mit Zeitpunkt, verwendeten Backups/Snapshots, Dauer und Ergebnis.
+- **Monthly (1x)**: full restore test in an isolated `dr-test` namespace/environment.
+- **Quarterly (1x)**: combined restore test (DB + PV + application) with a smoke test.
+- **Success criterion**: application starts, health checks are OK, login and a critical business action succeed.
+- **Evidence**: log containing timestamp, backups/snapshots used, duration, and outcome.
 
 ---
 
-### 2) Recovery bei Pod-/Node-Ausfall inkl. RTO/RPO
+### 2) Recovery from Pod/Node Failure including RTO/RPO
 
-#### 2.1 Zielwerte
+#### 2.1 Target Values
 
-- **Pod-Ausfall**: `RTO <= 10 Minuten`, `RPO <= 15 Minuten`
-- **Node-Ausfall**: `RTO <= 30 Minuten`, `RPO <= 15 Minuten`
-- **Region-/Cluster-kompletter Ausfall (falls nur Single-Cluster)**: `RTO <= 4 Stunden`, `RPO <= 24 Stunden`
+- **Pod failure**: `RTO <= 10 minutes`, `RPO <= 15 minutes`
+- **Node failure**: `RTO <= 30 minutes`, `RPO <= 15 minutes`
+- **Full region/cluster failure (if only a single cluster exists)**: `RTO <= 4 hours`, `RPO <= 24 hours`
 
-#### 2.2 Runbook: Pod-Ausfall
+#### 2.2 Runbook: Pod Failure
 
-1. **Alarm prüfen** (z. B. CrashLoopBackOff, OOMKilled, Readiness Fail).
-2. Zustand erfassen:
+1. **Check the alert** (for example CrashLoopBackOff, OOMKilled, readiness failure).
+2. Capture the current state:
    ```bash
    kubectl -n prod get pods -o wide
    kubectl -n prod describe pod <pod-name>
    kubectl -n prod logs <pod-name> --previous
    ```
-3. Falls Konfig-/Secret-Fehler: korrigieren und Rollout neu starten.
+3. If the issue is caused by config/secret errors, fix it and restart the rollout.
    ```bash
    kubectl -n prod rollout restart deployment/backend
    ```
-4. Verifizieren:
+4. Verify:
    ```bash
    kubectl -n prod rollout status deployment/backend --timeout=300s
    ```
-5. API-/Frontend-Healthcheck prüfen und Incident schließen.
+5. Check API/frontend health and close the incident.
 
-#### 2.3 Runbook: Node-Ausfall
+#### 2.3 Runbook: Node Failure
 
-1. Node als `NotReady` identifizieren:
+1. Identify the node as `NotReady`:
    ```bash
    kubectl get nodes
    ```
-2. Workloads sichern und neu verteilen:
+2. Safely evict and redistribute workloads:
    ```bash
    kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data
    ```
-3. Infrastruktur-Team behebt Node/VM/Host.
-4. Node nach Reparatur wieder aufnehmen:
+3. Infrastructure team repairs the node/VM/host.
+4. Re-enable the node after repair:
    ```bash
    kubectl uncordon <node-name>
    ```
-5. Prüfen, ob Replikate + Stateful Workloads wieder stabil laufen:
+5. Check whether replicas and stateful workloads are stable again:
    ```bash
    kubectl -n prod get pods -o wide
    ```
 
 ---
 
-### 3) Rollback-Strategie
+### 3) Rollback Strategy
 
-#### 3.1 Image-Tagging
+#### 3.1 Image Tagging
 
-- **Dev**: immutable Tag pro Commit-SHA (`:<git-sha>`).
-- **Prod**: immutable Release-Tag (`:vX.Y.Z`) plus optional `:prod` als beweglicher Alias.
-- Niemals auf mutable `:latest` für produktive Rollouts vertrauen.
+- **Dev**: immutable tag per commit SHA (`:<git-sha>`).
+- **Prod**: immutable release tag (`:vX.Y.Z`) plus optional `:prod` as a moving alias.
+- Never rely on mutable `:latest` for production rollouts.
 
-#### 3.2 Kubernetes Rollback mit `kubectl`
+#### 3.2 Kubernetes Rollback with `kubectl`
 
-1. Rollout-Historie prüfen:
+1. Check the rollout history:
    ```bash
    kubectl -n prod rollout history deployment/backend
    ```
-2. Auf vorherige Revision zurück:
+2. Roll back to the previous revision:
    ```bash
    kubectl -n prod rollout undo deployment/backend
    ```
-3. Oder gezielt auf Revision:
+3. Or roll back to a specific revision:
    ```bash
    kubectl -n prod rollout undo deployment/backend --to-revision=<n>
    ```
-4. Status + Smoke-Test:
+4. Status and smoke test:
    ```bash
    kubectl -n prod rollout status deployment/backend --timeout=300s
    ```
 
-#### 3.3 Helm Rollback (wenn Helm genutzt wird)
+#### 3.3 Helm Rollback (if Helm is used)
 
 ```bash
 helm -n prod history fastapi-app
@@ -587,48 +587,48 @@ helm -n prod status fastapi-app
 
 ---
 
-### 4) IaC-Reprovisioning mit Terraform (ohne sensitive Daten im Code)
+### 4) IaC Reprovisioning with Terraform (without sensitive data in code)
 
-#### 4.1 Grundsätze
+#### 4.1 Principles
 
-- Keine Secrets in `*.tf`, `*.tfvars` im Repo oder in Klartext-Outputs.
-- Sensitive Werte ausschließlich über Secret Store/CI-Variablen (z. B. `TF_VAR_*`).
-- Remote State (z. B. S3 + Locking via DynamoDB oder Terraform Cloud) verpflichtend für Teambetrieb.
+- No secrets in `*.tf`, `*.tfvars`, or plaintext outputs in the repository.
+- Sensitive values only through a secret store or CI variables (for example `TF_VAR_*`).
+- Remote state (for example S3 + locking via DynamoDB or Terraform Cloud) is mandatory for team operation.
 
 #### 4.2 Runbook: Reprovisioning
 
-1. **Terraform initialisieren**:
+1. **Initialize Terraform**:
    ```bash
    terraform init -upgrade
    ```
-2. **Format/Validierung**:
+2. **Format / validation**:
    ```bash
    terraform fmt -check
    terraform validate
    ```
-3. **Plan erstellen** (mit env-basierten sensitiven Variablen):
+3. **Create the plan** (with environment-based sensitive variables):
    ```bash
    terraform plan -out=tfplan
    ```
-4. **Plan prüfen (Vier-Augen-Prinzip)**.
-5. **Apply exakt aus freigegebenem Plan**:
+4. **Review the plan (four-eyes principle)**.
+5. **Apply exactly from the approved plan**:
    ```bash
    terraform apply tfplan
    ```
-6. **Post-Checks**: Ressourcenstatus, Netzwerkpfade, Cluster-Erreichbarkeit, App-Health.
+6. **Post-checks**: resource status, network paths, cluster reachability, application health.
 
-#### 4.3 State-Handling
+#### 4.3 State Handling
 
-- Vor Änderungen:
+- Before changes:
   ```bash
   terraform state pull > "state-backup-$(date +%F_%H%M).json"
   ```
-- Bei Drift:
+- For drift:
   ```bash
   terraform plan -refresh-only
   ```
-- Import bestehender Ressourcen:
+- Import existing resources:
   ```bash
   terraform import <resource_address> <provider_resource_id>
   ```
-- Kein manuelles Editieren der State-Datei außer im formal freigegebenen Break-Glass-Prozess.
+- Do not edit the state file manually unless it is part of a formally approved break-glass process.

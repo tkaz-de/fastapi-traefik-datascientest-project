@@ -1,21 +1,21 @@
-# BEFEHL ZUM AUSFÜHREN:
+# COMMAND TO RUN:
 # ansible-playbook -i inventory.ini setup-vm.yml -K
 
-- name: "Konfiguration der neuen Test-VM"
+- name: "Configure the new test VM"
   hosts: fastapivm_test
   become: yes
   vars:
-    # Verhindert Warnungen bezüglich der Python-Version
+    # Prevent warnings related to the Python version
     ansible_python_interpreter: /usr/bin/python3.12
 
   tasks:
-    - name: "System-Update durchführen"
+    - name: "Run system update"
       apt:
         update_cache: yes
         upgrade: dist
         cache_valid_time: 3600
 
-    - name: "Docker & Tools installieren"
+    - name: "Install Docker and tools"
       apt:
         name: 
           - docker.io
@@ -25,25 +25,25 @@
           - conntrack
         state: present
 
-    - name: "User zur Docker-Gruppe hinzufügen"
+    - name: "Add user to the Docker group"
       user:
         name: ipatsaf
         groups: docker
         append: yes
 
-    - name: "Minikube herunterladen"
+    - name: "Download Minikube"
       get_url:
         url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
         dest: /usr/local/bin/minikube
         mode: '0755'
 
-    - name: "Kubectl herunterladen"
+    - name: "Download kubectl"
       get_url:
         url: "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
         dest: /usr/local/bin/kubectl
         mode: '0755'
 
-    - name: "Prüfen ob Minikube bereits läuft"
+    - name: "Check whether Minikube is already running"
       become: yes
       become_user: ipatsaf
       command: minikube status
@@ -51,19 +51,19 @@
       ignore_errors: yes
       changed_when: false
 
-    - name: "Altes Minikube Profil löschen (wegen Fehlern oder Speicheränderung)"
+    - name: "Delete the old Minikube profile if needed"
       become: yes
       become_user: ipatsaf
       command: minikube delete
-      # Wir löschen, wenn minikube nicht "Running" ist, um die neue Config zu erzwingen
+      # Delete the profile when Minikube is not running to enforce the new config
       when: "'Running' not in minikube_status.stdout"
       ignore_errors: yes
 
-    - name: "Minikube starten"
+    - name: "Start Minikube"
       become: yes
       become_user: ipatsaf
-      # Wir nutzen 2048 (2GB), das ist der stabilste Wert für 4GB VMs
+      # Use 2048 MB (2 GB), the most stable value for 4 GB VMs
       command: minikube start --driver=docker --memory=2048 --cpus=2
       register: minikube_start_result
-      # Starten, wenn es nicht läuft
+      # Start only when it is not already running
       when: "'Running' not in minikube_status.stdout"
