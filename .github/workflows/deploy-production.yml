@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-push
     environment:
-      name: production
+      name: prod
     steps:
       - name: Await manual approval
         run: echo "Deployment to production approved via GitHub Environment reviewers."
@@ -69,7 +69,7 @@ jobs:
       - build-and-push
       - approval-gate
     environment:
-      name: production
+      name: prod
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
